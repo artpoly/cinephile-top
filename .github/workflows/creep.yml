@@ -51,6 +51,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Install Dependencies
+        run: |
+          pushd ${SRC_NAME} &&
+          pip install -U -r requirements.txt >/dev/null 2>&1
+          popd
+
       - name: Run script maoyan
         if: github.event.schedule == '0 2,8 * * *'
         run: |

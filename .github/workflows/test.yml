@@ -9,7 +9,7 @@ jobs:
       contents: write
 
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
 
@@ -42,19 +42,27 @@ jobs:
       # - name: Set up Python
       #   run: uv python install
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # - name: Cache pip
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cache/pip
+      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
 
-      - name: Run script allocine
-        # if: github.event.schedule == '0 7,13 * * *'
+      - name: Install Dependencies
         run: |
-          pushd ${SRC_NAME} && 
-          bash scripts/run-top.sh allocine &&
+          pushd ${SRC_NAME} &&
+          pip install -U -r requirements.txt >/dev/null 2>&1
+          popd
+
+      - name: Run scripts
+        run: |
+          pushd ${SRC_NAME} || exit 0
+          bash scripts/run-top.sh maoyan
+          bash scripts/run-top.sh imdb
+          bash scripts/run-top.sh tmdb
+          bash scripts/run-top.sh allocine
           popd
 
       - name: Git auto commit
